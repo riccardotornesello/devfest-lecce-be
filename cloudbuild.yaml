@@ -1,5 +1,6 @@
 steps:
   # Build the image
+  # TODO: cache
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
