@@ -6,4 +6,4 @@ class Badge(models.Model):
 
     name = models.CharField(max_length=100)
     description = models.TextField()
-    picture = models.ImageField(upload_to="badges/")
+    picture = models.ImageField(upload_to="badges/", null=True, blank=True)
