@@ -32,6 +32,7 @@ class Conference(models.Model):
 
     name = models.CharField(max_length=100)
     note = models.TextField(blank=True, null=True)
+    picture = models.ImageField(upload_to="conferences/", null=True, blank=True)
 
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()

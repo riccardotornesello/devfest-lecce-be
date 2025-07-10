@@ -9,9 +9,10 @@ class ConferenceSerializer(serializers.HyperlinkedModelSerializer):
             "id",
             "name",
             "note",
+            "picture",
             "start_time",
             "end_time",
-            "speaker",
+            "speaker",  # TODO: nested
             "topic",
             "typology",
             "level",

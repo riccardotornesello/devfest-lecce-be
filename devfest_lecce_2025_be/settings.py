@@ -40,8 +40,9 @@ INSTALLED_APPS = [
     # Third-party apps
     "rest_framework",
     # Custom apps
-    "speakers",
+    "badges",
     "conferences",
+    "speakers",
 ]
 
 MIDDLEWARE = [
@@ -125,3 +126,17 @@ STATIC_URL = "static/"
 # https://docs.djangoproject.com/en/5.2/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+
+#####################################################
+# STORAGE
+#####################################################
+
+STORAGES = {
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+    },
+    "staticfiles": {
+        "BACKEND": "storages.backends.s3boto3.S3Boto3Storage",
+    },
+}

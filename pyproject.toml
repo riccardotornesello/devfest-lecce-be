@@ -8,6 +8,8 @@ authors = ["Riccardo Tornesello <riccardo.tornesello@gmail.com>"]
 python = "^3.10"
 Django = "^5.2.4"
 djangorestframework = "^3.16.0"
+django-storages = {extras = ["google"], version = "^1.14.6"}
+pillow = "^11.3.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
