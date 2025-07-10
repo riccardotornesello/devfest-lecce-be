@@ -1,7 +1,8 @@
+from rest_framework import permissions
 from rest_framework.generics import ListAPIView
-from rest_framework import permissions, viewsets
-from .serializers import ConferenceSerializer
+
 from .models import Conference
+from .serializers import ConferenceSerializer
 
 
 class ConferenceListView(ListAPIView):

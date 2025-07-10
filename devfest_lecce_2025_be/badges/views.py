@@ -1,7 +1,8 @@
+from rest_framework import permissions
 from rest_framework.generics import ListAPIView
-from rest_framework import permissions, viewsets
-from .serializers import BadgeSerializer
+
 from .models import Badge
+from .serializers import BadgeSerializer
 
 
 class BadgeListView(ListAPIView):

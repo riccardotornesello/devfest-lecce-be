@@ -22,3 +22,9 @@ build-backend = "hatchling.build"
 dev = [
     "ruff>=0.12.2",
 ]
+
+[tool.hatch.build.targets.wheel]
+packages = ["devfest_lecce_2025_be"]
+
+[tool.ruff.lint]
+extend-select = ["I"]
