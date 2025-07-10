@@ -1,0 +1,26 @@
+steps:
+  # Build the image
+  - name: "gcr.io/cloud-builders/docker"
+    args:
+      [
+        "build",
+        "-t",
+        "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:$COMMIT_SHA",
+        ".",
+      ]
+  # Push the image to Artifact Registry
+  - name: "gcr.io/cloud-builders/docker"
+    args: ["push", "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:$COMMIT_SHA"]
+  # Deploy image to Cloud Run
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "deploy"
+      - "${_SERVICE_NAME}"
+      - "--image"
+      - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:$COMMIT_SHA"
+      - "--region"
+      - "${_SERVICE_REGION}"
+images:
+  - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:$COMMIT_SHA"
