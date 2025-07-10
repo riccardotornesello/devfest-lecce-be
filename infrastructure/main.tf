@@ -30,6 +30,14 @@ resource "google_artifact_registry_repository" "my-repo" {
   format        = "DOCKER"
 }
 
+resource "google_storage_bucket" "media" {
+  name          = var.bucket_name
+  location      = var.region
+  force_destroy = false
+
+  uniform_bucket_level_access = true
+}
+
 resource "google_cloud_run_v2_service" "default" {
   depends_on = [google_project_service.run]
 
@@ -41,6 +49,19 @@ resource "google_cloud_run_v2_service" "default" {
   template {
     containers {
       image = "${var.region}-docker.pkg.dev/${google_artifact_registry_repository.my-repo.project}/${google_artifact_registry_repository.my-repo.name}/devfest-lecce-backend:latest"
+
+      ports {
+        container_port = 8000
+      }
+
+      env {
+        name  = "GS_BUCKET_NAME"
+        value = google_storage_bucket.media.name
+      }
+      env {
+        name  = "GS_PROJECT_ID"
+        value = var.project
+      }
     }
   }
 }

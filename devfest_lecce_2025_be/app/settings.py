@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.2/ref/settings/
 """
 
+import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -136,11 +137,30 @@ DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 # STORAGE
 #####################################################
 
-# STORAGES = {
-#     "default": {
-#         "BACKEND": "storages.backends.s3.S3Storage",
-#     },
-#     "staticfiles": {
-#         "BACKEND": "storages.backends.s3.S3Storage",
-#     },
-# }
+STORAGES = (
+    {
+        "default": {
+            "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+            "OPTIONS": {
+                "bucket_name": os.getenv("GS_BUCKET_NAME"),
+                "project_id": os.getenv("GS_PROJECT_ID"),
+            },
+        },
+        "staticfiles": {
+            "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
+            "OPTIONS": {
+                "bucket_name": os.getenv("GS_BUCKET_NAME"),
+                "project_id": os.getenv("GS_PROJECT_ID"),
+            },
+        },
+    }
+    if os.getenv("GS_BUCKET_NAME") is not None
+    else {
+        "default": {
+            "BACKEND": "django.core.files.storage.FileSystemStorage",
+        },
+        "staticfiles": {
+            "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
+        },
+    }
+)
