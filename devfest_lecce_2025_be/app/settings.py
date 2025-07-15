@@ -1,7 +1,17 @@
 import os
+import logging
 from pathlib import Path
 
+from .utils import print_warning, print_section_start, print_section_end
+
+
+logging.basicConfig(level=logging.DEBUG)
+
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+
+print_section_start("Settings Initialization")
 
 
 #####################################################
@@ -11,13 +21,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("SECRET_KEY")
 if not SECRET_KEY:
     SECRET_KEY = "django-insecure-z&-aca$_@z_!p7)@7ii#gt!$#v3$i#+o$ap^t&3)-7#bsebw32"
-    print(
-        "⚠️ WARNING: SECRET_KEY is not set. Using a default value, which is insecure for production!"
+    print_warning(
+        "SECRET_KEY is not set. Using a default value, which is insecure for production!"
     )
 
 DEBUG = os.getenv("DEBUG", "true").lower() in ("true", "1", "yes")
 if DEBUG:
-    print("⚠️ WARNING: DEBUG is set to True. This should only be used in development!")
+    print_warning("DEBUG is set to True. This should only be used in development!")
 
 ALLOWED_HOSTS = []
 
@@ -145,8 +155,8 @@ else:
             "BACKEND": "django.contrib.staticfiles.storage.StaticFilesStorage",
         },
     }
-    print(
-        "⚠️ WARNING: Google Cloud Storage is not configured. Using local file storage instead."
+    print_warning(
+        "Google Cloud Storage is not configured. Using local file storage instead."
     )
 
 STATIC_URL = "static/"
@@ -154,3 +164,6 @@ STATIC_URL = "static/"
 MEDIA_URL = "media/"
 
 MEDIA_ROOT = BASE_DIR / "media"
+
+
+print_section_end("Settings Initialization")

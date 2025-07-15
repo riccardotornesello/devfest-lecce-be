@@ -17,7 +17,6 @@ Note: to save on the registry price, all the images are tagged with the "latest"
 
 ## TODO
 
-- Log levels
 - Postgres configuration
 - Docker compose
 - Pipeline and git hooks
