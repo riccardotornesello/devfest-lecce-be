@@ -1,16 +1,28 @@
 steps:
   # Build the image
   - name: "gcr.io/cloud-builders/docker"
+    entrypoint: "bash"
+    args:
+      [
+        "-c",
+        "docker pull ${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest || exit 0",
+      ]
+
+  - name: "gcr.io/cloud-builders/docker"
     args:
       [
         "build",
         "-t",
         "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest",
+        "--cache-from",
+        "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest",
         ".",
       ]
+
   # Push the image to Artifact Registry
   - name: "gcr.io/cloud-builders/docker"
-    args: ["push", "-a", "${_ARTIFACT_REGISTRY}/devfest-lecce-backend"]
+    args: ["push", "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"]
+
   # Deploy image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
@@ -22,5 +34,6 @@ steps:
       - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
       - "--region"
       - "${_SERVICE_REGION}"
+
 images:
   - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"

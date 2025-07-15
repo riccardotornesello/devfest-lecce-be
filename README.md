@@ -21,5 +21,4 @@ Note: to save on the registry price, all the images are tagged with the "latest"
 - Postgres configuration
 - Docker compose
 - Pipeline
-- Cache in pipeline
 - Collect static files in pipeline
