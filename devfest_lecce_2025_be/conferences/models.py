@@ -9,6 +9,11 @@ class ConferenceTopic(models.Model):
     def __str__(self):
         return self.name
 
+    class Meta:
+        verbose_name = "Conference Topic"
+        verbose_name_plural = "Conference Topics"
+        ordering = ["name"]
+
 
 class ConferenceType(models.Model):
     id = models.AutoField(primary_key=True)
@@ -16,6 +21,11 @@ class ConferenceType(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        verbose_name = "Conference Type"
+        verbose_name_plural = "Conference Types"
+        ordering = ["name"]
 
 
 class Conference(models.Model):
@@ -58,3 +68,11 @@ class Conference(models.Model):
         choices=Language.choices,
         default=Language.ENGLISH,
     )
+
+    def __str__(self):
+        return f"{self.name} ({self.start_time.strftime('%Y-%m-%d %H:%M')})"
+
+    class Meta:
+        verbose_name = "Conference"
+        verbose_name_plural = "Conferences"
+        ordering = ["name"]

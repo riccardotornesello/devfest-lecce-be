@@ -8,3 +8,11 @@ class Speaker(models.Model):
     email = models.EmailField()
     country = models.CharField(max_length=100)  # TODO: should be the country code?
     picture = models.ImageField(upload_to="speakers/", null=True, blank=True)
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        verbose_name = "Speaker"
+        verbose_name_plural = "Speakers"
+        ordering = ["name"]
