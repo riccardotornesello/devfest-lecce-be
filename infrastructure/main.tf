@@ -38,10 +38,10 @@ resource "google_storage_bucket" "media" {
   uniform_bucket_level_access = true
 }
 
-resource "google_cloud_run_v2_service" "default" {
+resource "google_cloud_run_v2_service" "be" {
   depends_on = [google_project_service.run]
 
-  name                = "devfest-lecce-backend"
+  name                = "devfest-lecce-be"
   location            = var.region
   deletion_protection = false
   ingress             = "INGRESS_TRAFFIC_ALL"
@@ -62,6 +62,30 @@ resource "google_cloud_run_v2_service" "default" {
         name  = "GS_PROJECT_ID"
         value = var.project
       }
+    }
+  }
+}
+
+resource "google_cloud_run_v2_service_iam_member" "be_invoker" {
+  name     = google_cloud_run_v2_service.be.name
+  location = google_cloud_run_v2_service.be.location
+  role     = "roles/run.invoker"
+  member   = "allUsers"
+}
+
+resource "google_cloud_run_v2_job" "be-job" {
+  depends_on = [google_project_service.run]
+
+  name                = "devfest-lecce-be-job"
+  location            = var.region
+  deletion_protection = false
+
+  template {
+    template {
+      containers {
+        image = "${var.region}-docker.pkg.dev/${google_artifact_registry_repository.my-repo.project}/${google_artifact_registry_repository.my-repo.name}/devfest-lecce-backend:latest"
+      }
+      timeout = "60s"
     }
   }
 }

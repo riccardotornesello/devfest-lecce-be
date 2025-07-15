@@ -23,17 +23,47 @@ steps:
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"]
 
+  # Update and execute the jobs to collect static and apply migrations
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "jobs"
+      - "update"
+      - "devfest-lecce-be-job"
+      - "--image=${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
+      - "--region=${_SERVICE_REGION}"
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "jobs"
+      - "execute"
+      - "devfest-lecce-be-job"
+      - "--update-env-vars=TASK=collectstatic"
+      - "--region=${_SERVICE_REGION}"
+
+  - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
+    entrypoint: gcloud
+    args:
+      - "run"
+      - "jobs"
+      - "execute"
+      - "devfest-lecce-be-job"
+      - "--update-env-vars=TASK=migrate"
+      - "--region=${_SERVICE_REGION}"
+
   # Deploy image to Cloud Run
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
       - "run"
-      - "deploy"
-      - "${_SERVICE_NAME}"
-      - "--image"
-      - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
-      - "--region"
-      - "${_SERVICE_REGION}"
+      - "services"
+      - "update"
+      - "devfest-lecce-be"
+      - "--image=${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
+      - "--region=${_SERVICE_REGION}"
 
 images:
   - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
