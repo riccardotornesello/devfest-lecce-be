@@ -10,6 +10,6 @@ class BadgeListView(ListAPIView):
     API view to retrieve the list of badges.
     """
 
-    queryset = Badge.objects.all()  # TODO: sorting
+    queryset = Badge.objects.all()
     serializer_class = BadgeSerializer
     permission_classes = [permissions.IsAuthenticatedOrReadOnly]

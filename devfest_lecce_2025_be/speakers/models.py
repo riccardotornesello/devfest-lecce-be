@@ -6,7 +6,7 @@ class Speaker(models.Model):
 
     name = models.CharField(max_length=100)
     email = models.EmailField()
-    country = models.CharField(max_length=100)  # TODO: should be the country code?
+    country = models.CharField(max_length=100)
     picture = models.ImageField(upload_to="speakers/", null=True, blank=True)
 
     def __str__(self):

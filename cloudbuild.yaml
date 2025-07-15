@@ -1,12 +1,9 @@
 steps:
   # Build the image
-  # TODO: cache
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
         "build",
-        "-t",
-        "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:$COMMIT_SHA",
         "-t",
         "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest",
         ".",
@@ -15,7 +12,6 @@ steps:
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "-a", "${_ARTIFACT_REGISTRY}/devfest-lecce-backend"]
   # Deploy image to Cloud Run
-  # TODO: collect static files
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -23,8 +19,8 @@ steps:
       - "deploy"
       - "${_SERVICE_NAME}"
       - "--image"
-      - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:$COMMIT_SHA"
+      - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
       - "--region"
       - "${_SERVICE_REGION}"
 images:
-  - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:$COMMIT_SHA"
+  - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"

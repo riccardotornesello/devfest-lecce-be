@@ -75,7 +75,6 @@ WSGI_APPLICATION = "app.wsgi.application"
 # DATABASE
 #####################################################
 
-# TODO: postgres
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",

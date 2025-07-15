@@ -8,8 +8,12 @@
 ## Build
 
 ```bash
-gcloud builds submit --config cloudbuild.yaml --substitutions=_ARTIFACT_REGISTRY="europe-west1-docker.pkg.dev/devfest-lecce/devfest-lecce",_SERVICE_REGION="europe-west1",_SERVICE_NAME="devfest-lecce-backend",COMMIT_SHA=dev
+gcloud builds submit --config cloudbuild.yaml --substitutions=_ARTIFACT_REGISTRY="europe-west1-docker.pkg.dev/devfest-lecce/devfest-lecce",_SERVICE_REGION="europe-west1",_SERVICE_NAME="devfest-lecce-backend"
 ```
+
+## Pipeline
+
+Note: to save on the registry price, all the images are tagged with the "latest" tag.
 
 ## TODO
 
@@ -17,3 +21,5 @@ gcloud builds submit --config cloudbuild.yaml --substitutions=_ARTIFACT_REGISTRY
 - Postgres configuration
 - Docker compose
 - Pipeline and git hooks
+- Cache in pipeline
+- Collect static files in pipeline
