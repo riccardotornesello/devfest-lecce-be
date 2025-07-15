@@ -1,9 +1,8 @@
-import os
 import logging
+import os
 from pathlib import Path
 
-from .utils import print_warning, print_section_start, print_section_end
-
+from .utils import print_section_end, print_section_start, print_warning
 
 logging.basicConfig(level=logging.DEBUG)
 
@@ -29,7 +28,11 @@ DEBUG = os.getenv("DEBUG", "true").lower() in ("true", "1", "yes")
 if DEBUG:
     print_warning("DEBUG is set to True. This should only be used in development!")
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+if "*" in ALLOWED_HOSTS:
+    print_warning(
+        "ALLOWED_HOSTS contains '*'. This is insecure and should not be used in production!"
+    )
 
 
 #####################################################
