@@ -1,9 +1,25 @@
 from rest_framework import serializers
+from speakers.serializers import SpeakerSerializer
+from .models import Conference, ConferenceTopic, ConferenceType
 
-from .models import Conference
+
+class ConferenceTopicSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConferenceTopic
+        fields = ["id", "name"]
 
 
-class ConferenceSerializer(serializers.HyperlinkedModelSerializer):
+class ConferenceTypeSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = ConferenceType
+        fields = ["id", "name"]
+
+
+class ConferenceSerializer(serializers.ModelSerializer):
+    topic = ConferenceTopicSerializer()
+    typology = ConferenceTypeSerializer()
+    speaker = SpeakerSerializer()
+
     class Meta:
         model = Conference
         fields = [
@@ -13,7 +29,7 @@ class ConferenceSerializer(serializers.HyperlinkedModelSerializer):
             "picture",
             "start_time",
             "end_time",
-            "speaker",  # TODO: nested
+            "speaker",
             "topic",
             "typology",
             "level",
