@@ -6,6 +6,19 @@ provider "google" {
   request_timeout = "60s"
 }
 
+locals {
+  env_vars = {
+    GS_BUCKET_NAME    = google_storage_bucket.media.name
+    GS_PROJECT_ID     = var.project
+    POSTGRES_DB       = google_sql_database.database.name
+    POSTGRES_USER     = google_sql_user.user.name
+    POSTGRES_PASSWORD = var.db_password
+    POSTGRES_HOST     = "/cloudsql/${google_sql_database_instance.instance.connection_name}"
+    POSTGRES_PORT     = 5432
+    ALLOWED_HOSTS     = "*"
+  }
+}
+
 resource "google_project_service" "artifactregistry" {
   project            = var.project
   service            = "artifactregistry.googleapis.com"
@@ -19,6 +32,16 @@ resource "google_project_service" "cloudbuild" {
 resource "google_project_service" "run" {
   project            = var.project
   service            = "run.googleapis.com"
+  disable_on_destroy = false
+}
+resource "google_project_service" "compute" {
+  project            = var.project
+  service            = "compute.googleapis.com"
+  disable_on_destroy = false
+}
+resource "google_project_service" "sqladmin" {
+  project            = var.project
+  service            = "sqladmin.googleapis.com"
   disable_on_destroy = false
 }
 
@@ -39,7 +62,7 @@ resource "google_storage_bucket" "media" {
 }
 
 resource "google_cloud_run_v2_service" "be" {
-  depends_on = [google_project_service.run]
+  depends_on = [google_project_service.run, google_project_service.compute, google_project_service.sqladmin]
 
   name                = "devfest-lecce-be"
   location            = var.region
@@ -47,6 +70,13 @@ resource "google_cloud_run_v2_service" "be" {
   ingress             = "INGRESS_TRAFFIC_ALL"
 
   template {
+    volumes {
+      name = "cloudsql"
+      cloud_sql_instance {
+        instances = [google_sql_database_instance.instance.connection_name]
+      }
+    }
+
     containers {
       image = "${var.region}-docker.pkg.dev/${google_artifact_registry_repository.my-repo.project}/${google_artifact_registry_repository.my-repo.name}/devfest-lecce-backend:latest"
 
@@ -54,13 +84,17 @@ resource "google_cloud_run_v2_service" "be" {
         container_port = 8000
       }
 
-      env {
-        name  = "GS_BUCKET_NAME"
-        value = google_storage_bucket.media.name
+      volume_mounts {
+        name       = "cloudsql"
+        mount_path = "/cloudsql"
       }
-      env {
-        name  = "GS_PROJECT_ID"
-        value = var.project
+
+      dynamic "env" {
+        for_each = local.env_vars
+        content {
+          name  = env.key
+          value = env.value
+        }
       }
     }
   }
@@ -74,7 +108,7 @@ resource "google_cloud_run_v2_service_iam_member" "be_invoker" {
 }
 
 resource "google_cloud_run_v2_job" "be-job" {
-  depends_on = [google_project_service.run]
+  depends_on = [google_project_service.run, google_project_service.compute, google_project_service.sqladmin]
 
   name                = "devfest-lecce-be-job"
   location            = var.region
@@ -82,10 +116,53 @@ resource "google_cloud_run_v2_job" "be-job" {
 
   template {
     template {
+      volumes {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [google_sql_database_instance.instance.connection_name]
+        }
+      }
+
       containers {
         image = "${var.region}-docker.pkg.dev/${google_artifact_registry_repository.my-repo.project}/${google_artifact_registry_repository.my-repo.name}/devfest-lecce-backend:latest"
+
+        volume_mounts {
+          name       = "cloudsql"
+          mount_path = "/cloudsql"
+        }
+
+        dynamic "env" {
+          for_each = local.env_vars
+          content {
+            name  = env.key
+            value = env.value
+          }
+        }
       }
       timeout = "60s"
     }
   }
+}
+
+resource "google_sql_database_instance" "instance" {
+  name             = "devfest-lecce-db"
+  region           = var.region
+  database_version = "POSTGRES_17"
+  settings {
+    edition = "ENTERPRISE"
+    tier    = "db-f1-micro"
+  }
+
+  deletion_protection = true
+}
+
+resource "google_sql_database" "database" {
+  name     = "devfest_lecce_db"
+  instance = google_sql_database_instance.instance.name
+}
+
+resource "google_sql_user" "user" {
+  name     = "devfest"
+  instance = google_sql_database_instance.instance.name
+  password = var.db_password
 }

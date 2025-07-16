@@ -16,3 +16,7 @@ variable "repository_id" {
 variable "bucket_name" {
   type = string
 }
+
+variable "db_password" {
+  type = string
+}

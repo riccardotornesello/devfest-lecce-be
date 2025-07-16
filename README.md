@@ -18,6 +18,5 @@ Note: to save on the registry price, all the images are tagged with the "latest"
 
 ## TODO
 
-- Postgres configuration
 - Docker compose
 - Automatic pipeline

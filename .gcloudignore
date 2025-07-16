@@ -3,5 +3,6 @@
 .gitignore
 
 /infrastructure/
+README.md
 
 #!include:.gitignore
