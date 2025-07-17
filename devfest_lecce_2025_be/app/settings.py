@@ -28,7 +28,9 @@ DEBUG = os.getenv("DEBUG", "true").lower() in ("true", "1", "yes")
 if DEBUG:
     print_warning("DEBUG is set to True. This should only be used in development!")
 
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "").split(",")
+ALLOWED_HOSTS = (
+    os.getenv("ALLOWED_HOSTS", "").split(",") if os.getenv("ALLOWED_HOSTS") else []
+)
 if "*" in ALLOWED_HOSTS:
     print_warning(
         "ALLOWED_HOSTS contains '*'. This is insecure and should not be used in production!"
@@ -48,6 +50,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     # Third-party apps
     "rest_framework",
+    "import_export",
     # Custom apps
     "badges",
     "conferences",
