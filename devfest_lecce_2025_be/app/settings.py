@@ -155,7 +155,7 @@ if os.getenv("GS_BUCKET_NAME") is not None:
         "BACKEND": "storages.backends.gcloud.GoogleCloudStorage",
         "OPTIONS": {
             "bucket_name": os.getenv("GS_BUCKET_NAME"),
-            "project_id": os.getenv("GS_PROJECT_ID"),
+            "querystring_auth": False,
         },
     }
 

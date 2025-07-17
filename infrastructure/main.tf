@@ -9,7 +9,6 @@ provider "google" {
 locals {
   env_vars = {
     GS_BUCKET_NAME    = google_storage_bucket.media.name
-    GS_PROJECT_ID     = var.project
     POSTGRES_DB       = google_sql_database.database.name
     POSTGRES_USER     = google_sql_user.user.name
     POSTGRES_PASSWORD = var.db_password
@@ -69,7 +68,10 @@ resource "google_cloud_run_v2_service" "be" {
   deletion_protection = false
   ingress             = "INGRESS_TRAFFIC_ALL"
 
+
   template {
+    service_account = google_service_account.runner.email
+
     volumes {
       name = "cloudsql"
       cloud_sql_instance {
@@ -116,6 +118,8 @@ resource "google_cloud_run_v2_job" "be-job" {
 
   template {
     template {
+      service_account = google_service_account.runner.email
+
       volumes {
         name = "cloudsql"
         cloud_sql_instance {
@@ -165,4 +169,27 @@ resource "google_sql_user" "user" {
   name     = "devfest"
   instance = google_sql_database_instance.instance.name
   password = var.db_password
+}
+
+resource "google_service_account" "runner" {
+  account_id = "gcf-devfest-lecce-be-runner"
+}
+
+resource "google_project_iam_member" "sql" {
+  project = google_service_account.runner.project
+  role    = "roles/cloudsql.editor"
+  member  = "serviceAccount:${google_service_account.runner.email}"
+}
+
+resource "google_project_iam_member" "cloud_storage" {
+  project = google_service_account.runner.project
+  role    = "roles/storage.objectUser"
+  member  = "serviceAccount:${google_service_account.runner.email}"
+}
+
+resource "google_storage_bucket_iam_member" "member" {
+  provider = google
+  bucket   = google_storage_bucket.media.name
+  role     = "roles/storage.objectViewer"
+  member   = "allUsers"
 }
