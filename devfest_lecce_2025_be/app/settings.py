@@ -36,6 +36,12 @@ if "*" in ALLOWED_HOSTS:
         "ALLOWED_HOSTS contains '*'. This is insecure and should not be used in production!"
     )
 
+CSRF_TRUSTED_ORIGINS = (
+    os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
+    if os.getenv("CSRF_TRUSTED_ORIGINS")
+    else []
+)
+
 
 #####################################################
 # APPLICATION

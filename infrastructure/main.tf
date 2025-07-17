@@ -8,13 +8,14 @@ provider "google" {
 
 locals {
   env_vars = {
-    GS_BUCKET_NAME    = google_storage_bucket.media.name
-    POSTGRES_DB       = google_sql_database.database.name
-    POSTGRES_USER     = google_sql_user.user.name
-    POSTGRES_PASSWORD = var.db_password
-    POSTGRES_HOST     = "/cloudsql/${google_sql_database_instance.instance.connection_name}"
-    POSTGRES_PORT     = 5432
-    ALLOWED_HOSTS     = "*"
+    GS_BUCKET_NAME       = google_storage_bucket.media.name
+    POSTGRES_DB          = google_sql_database.database.name
+    POSTGRES_USER        = google_sql_user.user.name
+    POSTGRES_PASSWORD    = var.db_password
+    POSTGRES_HOST        = "/cloudsql/${google_sql_database_instance.instance.connection_name}"
+    POSTGRES_PORT        = 5432
+    ALLOWED_HOSTS        = "*"
+    CSRF_TRUSTED_ORIGINS = "https://*.run.app"
   }
 }
 
