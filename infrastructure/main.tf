@@ -65,3 +65,43 @@ module "backend" {
   bucket_name        = module.storage.bucket_name
   image              = "${var.region}-docker.pkg.dev/${google_artifact_registry_repository.my-repo.project}/${google_artifact_registry_repository.my-repo.name}/devfest-lecce-backend:latest"
 }
+
+module "lb-http" {
+  source  = "terraform-google-modules/lb-http/google//modules/serverless_negs"
+  version = "~> 12.0"
+
+  name    = "devfest-lecce-http-lb"
+  project = var.project
+
+  ssl                             = true
+  managed_ssl_certificate_domains = [var.domain]
+  https_redirect                  = true
+
+  backends = {
+    default = {
+      description = null
+      groups = [
+        {
+          group = google_compute_region_network_endpoint_group.serverless_neg.id
+        }
+      ]
+      enable_cdn = false
+
+      iap_config = {
+        enable = false
+      }
+      log_config = {
+        enable = false
+      }
+    }
+  }
+}
+
+resource "google_compute_region_network_endpoint_group" "serverless_neg" {
+  name                  = "serverless-neg"
+  network_endpoint_type = "SERVERLESS"
+  region                = var.region
+  cloud_run {
+    service = module.backend.service_name
+  }
+}

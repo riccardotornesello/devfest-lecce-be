@@ -20,3 +20,7 @@ variable "bucket_name" {
 variable "db_password" {
   type = string
 }
+
+variable "domain" {
+  type = string
+}
