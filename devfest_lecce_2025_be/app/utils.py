@@ -1,5 +1,7 @@
 import logging
 
+from firebase_admin import auth
+
 
 class bcolors:
     HEADER = "\033[95m"
@@ -32,3 +34,16 @@ def print_section_end(section_name):
     Print a section end message in bold.
     """
     logging.info(f"{bcolors.BOLD}--- End of {section_name} ---{bcolors.ENDC}")
+
+
+def get_firebase_user(id_token):
+    if not id_token:
+        return None
+
+    try:
+        decoded_token = auth.verify_id_token(id_token)
+        uid = decoded_token["uid"]
+        return uid
+    except Exception as e:
+        logging.error(f"Error verifying Firebase ID token: {e}")
+        return None
