@@ -6,4 +6,4 @@ from .models import Speaker
 class SpeakerSerializer(serializers.ModelSerializer):
     class Meta:
         model = Speaker
-        fields = ["id", "name", "email", "country", "picture"]
+        fields = ["id", "bio", "name", "country", "picture"]
