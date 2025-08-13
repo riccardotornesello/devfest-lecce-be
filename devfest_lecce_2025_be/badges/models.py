@@ -1,4 +1,10 @@
+import secrets
+
 from django.db import models
+
+
+def generate_secret():
+    return secrets.token_urlsafe(16)
 
 
 class Badge(models.Model):
@@ -7,6 +13,7 @@ class Badge(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     picture = models.ImageField(upload_to="badges/", null=True, blank=True)
+    secret = models.CharField(max_length=100, unique=True, default=generate_secret)
 
     def __str__(self):
         return self.name

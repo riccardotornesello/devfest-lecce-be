@@ -4,6 +4,15 @@ from rest_framework.authentication import BaseAuthentication
 from .utils import get_firebase_user
 
 
+class FirebaseUser:
+    def __init__(self, uid):
+        self.uid = uid
+        self.is_authenticated = True
+
+    def __str__(self):
+        return f"FirebaseUser {self.uid}"
+
+
 class FirebaseAuthentication(BaseAuthentication):
     def get_authorization_header(self, request):
         """
@@ -41,4 +50,5 @@ class FirebaseAuthentication(BaseAuthentication):
         if uid is None:
             return None
 
-        return (uid, None)
+        user = FirebaseUser(uid)
+        return (user, None)
