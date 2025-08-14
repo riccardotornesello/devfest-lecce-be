@@ -19,4 +19,5 @@ Note: to save on the registry price, all the images are tagged with the "latest"
 ## TODO
 
 - Docker compose
-- Automatic pipeline
+- Improve pipeline with linting and formatting
+- Clean infrastructure

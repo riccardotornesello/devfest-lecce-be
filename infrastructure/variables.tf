@@ -24,3 +24,7 @@ variable "db_password" {
 variable "domain" {
   type = string
 }
+
+variable "repo_name" {
+  type = string
+}

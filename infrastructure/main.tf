@@ -105,3 +105,31 @@ resource "google_compute_region_network_endpoint_group" "serverless_neg" {
     service = module.backend.service_name
   }
 }
+
+resource "google_service_account" "cloudbuild_service_account" {
+  account_id   = "cloudbuild-sa"
+  display_name = "cloudbuild-sa"
+  description  = "Cloud build service account"
+}
+
+resource "google_project_iam_member" "cloudbuild_service_account_editor" {
+  project = var.project
+  role    = "roles/editor"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
+resource "google_cloudbuild_trigger" "build" {
+  location        = var.region
+  service_account = google_service_account.cloudbuild_service_account.id
+  filename        = "cloudbuild.yaml"
+
+  trigger_template {
+    branch_name = "main"
+    repo_name   = var.repo_name
+  }
+
+  substitutions = {
+    _ARTIFACT_REGISTRY = "${var.region}-docker.pkg.dev/${google_artifact_registry_repository.my-repo.project}/${google_artifact_registry_repository.my-repo.name}"
+    _SERVICE_REGION    = var.region
+  }
+}
