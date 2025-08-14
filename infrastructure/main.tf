@@ -118,6 +118,13 @@ resource "google_project_iam_member" "cloudbuild_service_account_editor" {
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
+resource "google_project_iam_member" "cloudbuild_service_account_logs" {
+  project = var.project
+  role    = "roles/logging.logWriter"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
+
 resource "google_cloudbuild_trigger" "build" {
   location        = var.region
   name            = "devfest-lecce-backend-build"
