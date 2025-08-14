@@ -25,6 +25,12 @@ variable "domain" {
   type = string
 }
 
+variable "repo_owner" {
+  type    = string
+  default = "riccardotornesello"
+}
+
 variable "repo_name" {
-  type = string
+  type    = string
+  default = "devfest-lecce-be"
 }

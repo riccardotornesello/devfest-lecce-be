@@ -120,13 +120,19 @@ resource "google_project_iam_member" "cloudbuild_service_account_editor" {
 
 resource "google_cloudbuild_trigger" "build" {
   location        = var.region
-  service_account = google_service_account.cloudbuild_service_account.id
+  name            = "devfest-lecce-backend-build"
   filename        = "cloudbuild.yaml"
+  service_account = google_service_account.cloudbuild_service_account.id
 
-  trigger_template {
-    branch_name = "main"
-    repo_name   = var.repo_name
+  github {
+    owner = var.repo_owner
+    name  = var.repo_name
+    push {
+      branch = "^main$"
+    }
   }
+
+  include_build_logs = "INCLUDE_BUILD_LOGS_WITH_STATUS"
 
   substitutions = {
     _ARTIFACT_REGISTRY = "${var.region}-docker.pkg.dev/${google_artifact_registry_repository.my-repo.project}/${google_artifact_registry_repository.my-repo.name}"
