@@ -118,6 +118,12 @@ resource "google_project_iam_member" "act_as" {
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
+resource "google_project_iam_member" "editor" {
+  project = var.project
+  role    = "roles/editor"
+  member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
+}
+
 resource "google_project_iam_member" "logs_writer" {
   project = var.project
   role    = "roles/logging.logWriter"
@@ -132,6 +138,7 @@ resource "google_cloudbuild_trigger" "build" {
 
   depends_on = [
     google_project_iam_member.act_as,
+    google_project_iam_member.editor,
     google_project_iam_member.logs_writer
   ]
 
