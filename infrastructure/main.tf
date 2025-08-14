@@ -112,24 +112,28 @@ resource "google_service_account" "cloudbuild_service_account" {
   description  = "Cloud build service account"
 }
 
-resource "google_project_iam_member" "cloudbuild_service_account_editor" {
+resource "google_project_iam_member" "act_as" {
   project = var.project
-  role    = "roles/editor"
+  role    = "roles/iam.serviceAccountUser"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
 
-resource "google_project_iam_member" "cloudbuild_service_account_logs" {
+resource "google_project_iam_member" "logs_writer" {
   project = var.project
   role    = "roles/logging.logWriter"
   member  = "serviceAccount:${google_service_account.cloudbuild_service_account.email}"
 }
-
 
 resource "google_cloudbuild_trigger" "build" {
   location        = var.region
   name            = "devfest-lecce-backend-build"
   filename        = "cloudbuild.yaml"
   service_account = google_service_account.cloudbuild_service_account.id
+
+  depends_on = [
+    google_project_iam_member.act_as,
+    google_project_iam_member.logs_writer
+  ]
 
   github {
     owner = var.repo_owner
