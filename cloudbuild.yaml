@@ -69,4 +69,4 @@ images:
   - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
 
 options:
-  default_logs_bucket_behavior: CLOUD_LOGGING_ONLY
+  logging: CLOUD_LOGGING_ONLY
