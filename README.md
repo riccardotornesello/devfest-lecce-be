@@ -1,5 +1,6 @@
 ## Useful commands
 
+- Add a package: uv add <package_name>
 - Install packages: uv sync
 - Format project: uv run ruff format
 - Lint and fix project: uv run ruff check --fix

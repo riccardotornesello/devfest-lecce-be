@@ -59,6 +59,7 @@ INSTALLED_APPS = [
     # Third-party apps
     "rest_framework",
     "import_export",
+    "drf_yasg",
     # Custom apps
     "badges",
     "conferences",
@@ -93,6 +94,15 @@ TEMPLATES = [
 ]
 
 WSGI_APPLICATION = "app.wsgi.application"
+
+REST_FRAMEWORK = {
+    "DEFAULT_AUTHENTICATION_CLASSES": [
+        "app.authentication.FirebaseAuthentication",
+    ],
+    "DEFAULT_PERMISSION_CLASSES": [
+        "rest_framework.permissions.IsAuthenticated",
+    ],
+}
 
 
 #####################################################

@@ -12,3 +12,7 @@ class BadgeSerializer(serializers.ModelSerializer):
     class Meta:
         model = Badge
         fields = ["id", "name", "description", "picture", "owned"]
+
+
+class BadgeScanSerializer(serializers.Serializer):
+    secret = serializers.CharField(max_length=100)

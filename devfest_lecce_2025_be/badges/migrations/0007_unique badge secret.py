@@ -2,8 +2,6 @@
 
 from django.db import migrations, models
 
-import badges.models
-
 
 class Migration(migrations.Migration):
     dependencies = [
@@ -14,8 +12,6 @@ class Migration(migrations.Migration):
         migrations.AlterField(
             model_name="badge",
             name="secret",
-            field=models.CharField(
-                default=badges.models.generate_secret, max_length=100, unique=True
-            ),
+            field=models.CharField(max_length=100, unique=True),
         ),
     ]
