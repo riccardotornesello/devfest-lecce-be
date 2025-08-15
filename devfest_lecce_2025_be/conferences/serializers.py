@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rooms.serializers import RoomSerializer
 from speakers.serializers import SpeakerSerializer
 
 from .models import Conference, ConferenceTopic, ConferenceType
@@ -20,6 +21,7 @@ class ConferenceSerializer(serializers.ModelSerializer):
     topic = ConferenceTopicSerializer()
     typology = ConferenceTypeSerializer()
     speaker = SpeakerSerializer()
+    room = RoomSerializer()
 
     class Meta:
         model = Conference
@@ -31,6 +33,7 @@ class ConferenceSerializer(serializers.ModelSerializer):
             "start_time",
             "end_time",
             "speaker",
+            "room",
             "topic",
             "typology",
             "level",

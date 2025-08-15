@@ -1,4 +1,5 @@
 from django.db import models
+from rooms.models import Room
 from speakers.models import Speaker
 
 
@@ -48,8 +49,9 @@ class Conference(models.Model):
     end_time = models.DateTimeField()
 
     speaker = models.ForeignKey(
-        Speaker, on_delete=models.CASCADE, related_name="conferences"
+        Speaker, on_delete=models.PROTECT, related_name="conferences"
     )
+    room = models.ForeignKey(Room, on_delete=models.PROTECT, related_name="conferences")
 
     topic = models.ForeignKey(
         ConferenceTopic, on_delete=models.PROTECT, related_name="conferences"
