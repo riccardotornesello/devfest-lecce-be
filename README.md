@@ -22,3 +22,4 @@ Note: to save on the registry price, all the images are tagged with the "latest"
 - Docker compose
 - Improve pipeline with linting and formatting
 - Clean infrastructure
+- Save infrastructure state in S3 or Terraform Cloud
