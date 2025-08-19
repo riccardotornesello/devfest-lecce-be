@@ -4,7 +4,7 @@ from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 
-from .models import Badge, OwnBadge
+from .models import Badge, BadgeCode, OwnBadge
 from .serializers import BadgeScanSerializer, BadgeSerializer
 
 
@@ -33,7 +33,8 @@ class ScanBadgeView(GenericAPIView):
     API view to retrieve a badge by its secret.
     """
 
-    serializer_class = BadgeSerializer
+    serializer_class = BadgeScanSerializer
+    queryset = Badge.objects.none()
 
     @swagger_auto_schema(
         request_body=BadgeScanSerializer,
@@ -53,14 +54,14 @@ class ScanBadgeView(GenericAPIView):
         secret = data_serializer.validated_data["secret"].lower()
 
         try:
-            badge = Badge.objects.get(name__iexact=secret)
-        except Badge.DoesNotExist:
-            return Response({"detail": "Badge not found."}, status=404)
+            badge_code = BadgeCode.objects.get(code__iexact=secret)
+        except BadgeCode.DoesNotExist:
+            return Response({"detail": "Code not valid."}, status=404)
 
-        # Check if the user already owns this badge
-        owned_badge = OwnBadge.objects.filter(badge=badge, user_id=user_id).first()
-        if not owned_badge:
-            owned_badge = OwnBadge.objects.create(badge=badge, user_id=user_id)
+        # Check which badges are new
+        new_badges = badge_code.badges.exclude(own_badges__user_id=user_id)
+        OwnBadge.objects.bulk_create(
+            [OwnBadge(badge=badge, user_id=user_id) for badge in new_badges]
+        )
 
-        serializer = self.get_serializer(badge)
-        return Response(serializer.data, status=201)
+        return Response(BadgeSerializer(new_badges, many=True).data, status=201)

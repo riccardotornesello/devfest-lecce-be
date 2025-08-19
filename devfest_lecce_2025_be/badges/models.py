@@ -8,7 +8,6 @@ class Badge(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     picture = models.ImageField(upload_to="badges/", null=True, blank=True)
-    secret = models.CharField(max_length=100)
 
     def __str__(self):
         return self.name
@@ -16,9 +15,6 @@ class Badge(models.Model):
     class Meta:
         verbose_name = "Badge"
         verbose_name_plural = "Badges"
-        constraints = [
-            models.UniqueConstraint(Lower("secret"), name="unique_badge_secret"),
-        ]
 
 
 class OwnBadge(models.Model):
@@ -28,10 +24,29 @@ class OwnBadge(models.Model):
         Badge, on_delete=models.CASCADE, related_name="own_badges"
     )
     user_id = models.CharField(max_length=100)
-    date_awarded = models.DateTimeField(auto_now_add=True)
+
+    awarded_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):
         return f"{self.user_id} - {self.badge.name}"
 
     class Meta:
         unique_together = ("badge", "user_id")
+
+
+class BadgeCode(models.Model):
+    id = models.AutoField(primary_key=True)
+    badges = models.ManyToManyField(Badge, related_name="badge_codes")
+    code = models.CharField(max_length=100, unique=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return f"{self.code}"
+
+    class Meta:
+        verbose_name = "Badge Code"
+        verbose_name_plural = "Badge Codes"
+        constraints = [
+            models.UniqueConstraint(Lower("code"), name="unique_badge_code"),
+        ]
