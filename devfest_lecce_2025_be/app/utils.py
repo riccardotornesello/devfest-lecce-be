@@ -1,6 +1,13 @@
 import logging
 
-from firebase_admin import auth
+import cachecontrol
+import google.auth.transport.requests
+import requests
+from google.oauth2 import id_token
+
+session = requests.session()
+cached_session = cachecontrol.CacheControl(session)
+request = google.auth.transport.requests.Request(session=cached_session)
 
 
 class bcolors:
@@ -22,6 +29,13 @@ def print_warning(message):
     logging.warning(f"{bcolors.WARNING}⚠️ WARNING: {message}{bcolors.ENDC}")
 
 
+def print_error(message):
+    """
+    Print an error message in red.
+    """
+    logging.error(f"{bcolors.FAIL}❌ ERROR: {message}{bcolors.ENDC}")
+
+
 def print_section_start(section_name):
     """
     Print a section start message in bold.
@@ -36,14 +50,19 @@ def print_section_end(section_name):
     logging.info(f"{bcolors.BOLD}--- End of {section_name} ---{bcolors.ENDC}")
 
 
-def get_firebase_user(id_token):
-    if not id_token:
-        return None
+def verify_firebase_token(id_token_str):
+    # TODO: variable client ids
+
+    FIREBASE_CLIENT_IDS = [
+        "514905954124-olcp9abhdkpugliopm5iu4r5q1uiicsr.apps.googleusercontent.com",
+        "514905954124-99f3ds205d38s8v603hv3bn9agjiheo7.apps.googleusercontent.com",
+    ]
 
     try:
-        decoded_token = auth.verify_id_token(id_token)
-        uid = decoded_token["uid"]
-        return uid
+        decoded = id_token.verify_oauth2_token(
+            id_token_str, request, audience=FIREBASE_CLIENT_IDS
+        )
+        return decoded["sub"]
     except Exception as e:
-        logging.error(f"Error verifying Firebase ID token: {e}")
+        print_error(f"Error during authentication: {e}")
         return None

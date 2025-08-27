@@ -1,7 +1,7 @@
 from rest_framework import HTTP_HEADER_ENCODING
 from rest_framework.authentication import BaseAuthentication
 
-from .utils import get_firebase_user
+from .utils import verify_firebase_token
 
 
 class FirebaseUser:
@@ -46,7 +46,7 @@ class FirebaseAuthentication(BaseAuthentication):
         return self.authenticate_credentials(token)
 
     def authenticate_credentials(self, key):
-        uid = get_firebase_user(key)
+        uid = verify_firebase_token(key)
         if uid is None:
             return None
 
