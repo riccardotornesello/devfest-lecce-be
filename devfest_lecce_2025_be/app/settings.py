@@ -2,8 +2,6 @@ import logging
 import os
 from pathlib import Path
 
-import firebase_admin
-
 from .utils import print_section_end, print_section_start, print_warning
 
 logging.basicConfig(level=logging.DEBUG)
@@ -153,8 +151,6 @@ AUTH_PASSWORD_VALIDATORS = [
         "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
-
-FIREBASE_APP = firebase_admin.initialize_app()
 
 
 #####################################################
