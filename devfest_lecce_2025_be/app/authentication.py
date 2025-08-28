@@ -14,6 +14,8 @@ class FirebaseUser:
 
 
 class FirebaseAuthentication(BaseAuthentication):
+    keyword = "Bearer"
+
     def get_authorization_header(self, request):
         """
         Return request's 'Authorization:' header, as a bytestring.
@@ -30,7 +32,7 @@ class FirebaseAuthentication(BaseAuthentication):
     def authenticate(self, request):
         auth = self.get_authorization_header(request).split()
 
-        if not auth or auth[0].lower() != "bearer":
+        if not auth or auth[0].lower() != self.keyword.lower().encode():
             return None
 
         if len(auth) == 1:
