@@ -18,7 +18,7 @@ class BadgeListView(ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        user_id = self.request.user if self.request.user else None
+        user_id = self.request.user.uid if self.request.user else None
 
         return Badge.objects.prefetch_related(
             Prefetch(
@@ -45,7 +45,7 @@ class ScanBadgeView(GenericAPIView):
         },
     )
     def post(self, request, *args, **kwargs):
-        user_id = self.request.user
+        user_id = self.request.user.uid
 
         data_serializer = BadgeScanSerializer(data=request.data)
         if not data_serializer.is_valid():

@@ -34,4 +34,5 @@ urlpatterns = [
     path("conferences/", include("conferences.urls")),
     path("rooms/", include("rooms.urls")),
     path("speakers/", include("speakers.urls")),
+    path("users/", include("users.urls")),
 ]

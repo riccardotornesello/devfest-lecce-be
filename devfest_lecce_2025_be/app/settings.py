@@ -63,6 +63,7 @@ INSTALLED_APPS = [
     "conferences",
     "rooms",
     "speakers",
+    "users",
 ]
 
 MIDDLEWARE = [
