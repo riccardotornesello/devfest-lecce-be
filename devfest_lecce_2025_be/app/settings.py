@@ -61,6 +61,7 @@ INSTALLED_APPS = [
     # Custom apps
     "badges",
     "conferences",
+    "connections",
     "rooms",
     "speakers",
     "users",

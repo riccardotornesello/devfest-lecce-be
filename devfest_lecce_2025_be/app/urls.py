@@ -31,6 +31,7 @@ urlpatterns = [
     #####################
     path("admin/", admin.site.urls),
     path("badges/", include("badges.urls")),
+    path("connections/", include("connections.urls")),
     path("conferences/", include("conferences.urls")),
     path("rooms/", include("rooms.urls")),
     path("speakers/", include("speakers.urls")),
