@@ -6,8 +6,8 @@ class User(models.Model):
 
     name = models.CharField(max_length=100, blank=True, null=True)
     surname = models.CharField(max_length=100, blank=True, null=True)
-    linked_in = models.CharField(max_length=100, blank=True, null=True)
-    instagram = models.CharField(max_length=100, blank=True, null=True)
+    linked_in = models.CharField(max_length=200, blank=True, null=True)
+    instagram = models.CharField(max_length=200, blank=True, null=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
