@@ -8,13 +8,15 @@ class Badge(models.Model):
     name = models.CharField(max_length=100)
     description = models.TextField()
     picture = models.ImageField(upload_to="badges/", null=True, blank=True)
+    points = models.IntegerField(default=0)
 
     def __str__(self):
-        return self.name
+        return f"{self.name} ({self.points} points)"
 
     class Meta:
         verbose_name = "Badge"
         verbose_name_plural = "Badges"
+        ordering = ["name"]
 
 
 class OwnBadge(models.Model):

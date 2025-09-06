@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
@@ -21,7 +22,17 @@ class BadgeCodeResource(resources.ModelResource):
 
 
 class BadgeAdmin(ImportExportModelAdmin):
+    def picture_preview(self, obj):
+        if obj.picture:
+            return format_html(
+                '<img src="{}" style="max-width:100px; max-height:100px"/>'.format(
+                    obj.picture.url
+                )
+            )
+
     resource_classes = [BadgeResource]
+    list_display = ["name", "points", "picture_preview"]
+    readonly_fields = ("picture_preview",)
 
 
 class OwnBadgeAdmin(ImportExportModelAdmin):
