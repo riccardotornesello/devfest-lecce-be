@@ -31,7 +31,7 @@ class BadgeAdmin(ImportExportModelAdmin):
             )
 
     resource_classes = [BadgeResource]
-    list_display = ["name", "points", "picture_preview"]
+    list_display = ["name", "description", "points", "picture_preview"]
     readonly_fields = ("picture_preview",)
 
 
