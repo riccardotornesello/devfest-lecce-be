@@ -5,7 +5,7 @@ from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from .models import Badge, BadgeCategory, BadgeCode, OwnBadge
+from .models import Badge, BadgeCategory, BadgeCode, BadgeCodeLog, OwnBadge
 from .serializers import BadgeScanSerializer, BadgeSerializer
 
 
@@ -62,6 +62,9 @@ class ScanBadgeView(GenericAPIView):
             badge_code = BadgeCode.objects.get(code__iexact=secret)
         except BadgeCode.DoesNotExist:
             return Response({"detail": "Code not valid."}, status=404)
+
+        # Log the usage of the badge code
+        BadgeCodeLog.objects.create(badge_code=secret, user_id=user_id)
 
         # Check which badges are new
         new_badges = badge_code.badges.exclude(own_badges__user_id=user_id)
