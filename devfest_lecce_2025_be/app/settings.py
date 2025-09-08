@@ -62,6 +62,7 @@ INSTALLED_APPS = [
     "badges",
     "conferences",
     "connections",
+    "leaderboard",
     "rooms",
     "speakers",
     "users",

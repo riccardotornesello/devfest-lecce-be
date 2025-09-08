@@ -36,4 +36,5 @@ urlpatterns = [
     path("rooms/", include("rooms.urls")),
     path("speakers/", include("speakers.urls")),
     path("users/", include("users.urls")),
+    path("leaderboard/", include("leaderboard.urls")),
 ]
