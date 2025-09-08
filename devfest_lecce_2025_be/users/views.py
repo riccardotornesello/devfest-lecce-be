@@ -33,3 +33,9 @@ class UserView(GenericAPIView):
 
         serializer.save()
         return Response(serializer.data)
+
+    def delete(self, request, *args, **kwargs):
+        user = self.get_queryset().first()
+        if user:
+            user.delete()
+        return Response(status=204)
