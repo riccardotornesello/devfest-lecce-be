@@ -3,12 +3,17 @@ from django.utils.html import format_html
 from import_export import resources
 from import_export.admin import ImportExportModelAdmin
 
-from .models import Badge, BadgeCode, OwnBadge
+from .models import Badge, BadgeCategory, BadgeCode, OwnBadge
 
 
 class BadgeResource(resources.ModelResource):
     class Meta:
         model = Badge
+
+
+class BadgeCategoryResource(resources.ModelResource):
+    class Meta:
+        model = BadgeCategory
 
 
 class OwnBadgeResource(resources.ModelResource):
@@ -35,6 +40,10 @@ class BadgeAdmin(ImportExportModelAdmin):
     readonly_fields = ("picture_preview",)
 
 
+class BadgeCategoryAdmin(ImportExportModelAdmin):
+    resource_classes = [BadgeCategoryResource]
+
+
 class OwnBadgeAdmin(ImportExportModelAdmin):
     resource_classes = [OwnBadgeResource]
 
@@ -44,5 +53,6 @@ class BadgeCodeAdmin(ImportExportModelAdmin):
 
 
 admin.site.register(Badge, BadgeAdmin)
+admin.site.register(BadgeCategory, BadgeCategoryAdmin)
 admin.site.register(OwnBadge, OwnBadgeAdmin)
 admin.site.register(BadgeCode, BadgeCodeAdmin)

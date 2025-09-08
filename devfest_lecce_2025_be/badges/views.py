@@ -3,8 +3,9 @@ from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import GenericAPIView, ListAPIView
 from rest_framework.permissions import AllowAny
 from rest_framework.response import Response
+from rest_framework.views import APIView
 
-from .models import Badge, BadgeCode, OwnBadge
+from .models import Badge, BadgeCategory, BadgeCode, OwnBadge
 from .serializers import BadgeScanSerializer, BadgeSerializer
 
 
@@ -18,14 +19,18 @@ class BadgeListView(ListAPIView):
     permission_classes = [AllowAny]
 
     def get_queryset(self):
-        user_id = self.request.user.uid if self.request.user else None
+        user_id = (
+            self.request.user.uid
+            if self.request.user and self.request.user.is_authenticated
+            else None
+        )
 
         return Badge.objects.prefetch_related(
             Prefetch(
                 "own_badges",
                 queryset=OwnBadge.objects.filter(user_id=user_id),
             )
-        )
+        ).select_related("category")
 
 
 class ScanBadgeView(GenericAPIView):
@@ -65,3 +70,13 @@ class ScanBadgeView(GenericAPIView):
         )
 
         return Response(BadgeSerializer(new_badges, many=True).data, status=201)
+
+
+class BadgeCategoryListView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, *args, **kwargs):
+        categories = (
+            BadgeCategory.objects.all().order_by("name").values_list("name", flat=True)
+        )
+        return Response(categories)
