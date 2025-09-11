@@ -1,3 +1,4 @@
+from app.throttling import ScanRateThrottle
 from django.db.models import Prefetch
 from drf_yasg.utils import swagger_auto_schema
 from rest_framework.generics import GenericAPIView, ListAPIView
@@ -40,6 +41,7 @@ class ScanBadgeView(GenericAPIView):
 
     serializer_class = BadgeScanSerializer
     queryset = Badge.objects.none()
+    throttle_classes = [ScanRateThrottle]
 
     @swagger_auto_schema(
         request_body=BadgeScanSerializer,
