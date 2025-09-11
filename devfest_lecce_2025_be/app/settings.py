@@ -36,6 +36,19 @@ if "*" in ALLOWED_HOSTS:
         "ALLOWED_HOSTS contains '*'. This is insecure and should not be used in production!"
     )
 
+_CORS_ALLOWED_ORIGINS = (
+    os.getenv("CORS_ALLOWED_ORIGINS", "").split(",")
+    if os.getenv("CORS_ALLOWED_ORIGINS")
+    else []
+)
+if "*" in _CORS_ALLOWED_ORIGINS:
+    print_warning(
+        "CORS_ALLOWED_ORIGINS contains '*'. This is insecure and should not be used in production!"
+    )
+    CORS_ALLOW_ALL_ORIGINS = True
+else:
+    CORS_ALLOWED_ORIGINS = _CORS_ALLOWED_ORIGINS
+
 CSRF_TRUSTED_ORIGINS = (
     os.getenv("CSRF_TRUSTED_ORIGINS", "").split(",")
     if os.getenv("CSRF_TRUSTED_ORIGINS")
@@ -58,6 +71,7 @@ INSTALLED_APPS = [
     "rest_framework",
     "import_export",
     "drf_yasg",
+    "corsheaders",
     # Custom apps
     "badges",
     "conferences",
@@ -71,6 +85,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
+    "corsheaders.middleware.CorsMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",

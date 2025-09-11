@@ -7,6 +7,7 @@ locals {
     POSTGRES_HOST        = "/cloudsql/${var.db_connection_name}"
     POSTGRES_PORT        = 5432
     ALLOWED_HOSTS        = "*"
+    CORS_ALLOWED_ORIGINS = "*"
     CSRF_TRUSTED_ORIGINS = "https://api.devfest.gdglecce.it"
   }
 }
