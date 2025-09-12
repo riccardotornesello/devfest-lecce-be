@@ -12,6 +12,7 @@ class UserResource(resources.ModelResource):
 
 class UserAdmin(ImportExportModelAdmin):
     resource_classes = [UserResource]
+    search_fields = ["id", "name", "surname", "linked_in", "instagram"]
 
 
 admin.site.register(User, UserAdmin)
