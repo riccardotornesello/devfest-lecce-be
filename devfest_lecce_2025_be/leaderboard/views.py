@@ -1,5 +1,5 @@
 from badges.models import OwnBadge
-from django.db.models import Sum
+from django.db.models import Max, Sum
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
 from rest_framework.permissions import AllowAny
@@ -22,8 +22,9 @@ class LeaderboardView(APIView):
         badges_query = (
             OwnBadge.objects.select_related("badge")
             .values("user_id")
-            .annotate(Sum("badge__points"))
-            .order_by("-badge__points__sum")
+            .annotate(total_points=Sum("badge__points"))
+            .annotate(last_awarded_at=Max("awarded_at"))
+            .order_by("-total_points", "last_awarded_at")
         )
 
         user_ids = [entry["user_id"] for entry in badges_query]
@@ -43,7 +44,7 @@ class LeaderboardView(APIView):
                     "id": entry["user_id"],
                     "name": user.name if user else None,
                     "surname": user.surname if user else None,
-                    "points": entry["badge__points__sum"],
+                    "points": entry["total_points"],
                 }
             )
 
