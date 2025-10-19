@@ -6,10 +6,16 @@ on:
   pull_request:
     branches: [ main, develop ]
 
+# Limit permissions to minimum required for security
+permissions:
+  contents: read
+
 jobs:
   lint-and-format:
     name: Lint and Format Check
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - uses: actions/checkout@v4
@@ -36,6 +42,8 @@ jobs:
   security-scan:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - uses: actions/checkout@v4
@@ -62,6 +70,8 @@ jobs:
   build-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - uses: actions/checkout@v4
@@ -98,6 +108,8 @@ jobs:
   docker-build:
     name: Docker Build Test
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     
     steps:
     - uses: actions/checkout@v4

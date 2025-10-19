@@ -120,6 +120,28 @@ devfest_lecce_2025_be/
 
 ## 🐳 Docker
 
+### Using Docker Compose (Recommended for local development)
+
+The easiest way to run the application with all dependencies:
+
+```bash
+# Start all services (database and web server)
+docker-compose up
+
+# Run migrations (in another terminal)
+docker-compose run migrate
+
+# Stop all services
+docker-compose down
+
+# Remove all data
+docker-compose down -v
+```
+
+The API will be available at `http://localhost:8000`
+
+### Using Docker directly
+
 Build and run with Docker:
 
 ```bash
@@ -190,7 +212,7 @@ This application follows security best practices:
 
 ## 📝 License
 
-This project is part of DevFest Lecce 2025.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
 ## 👥 Authors
 
