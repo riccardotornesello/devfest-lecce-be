@@ -2,12 +2,13 @@
 # These are passed to the Django application
 locals {
   env_vars = {
+    DEBUG                = "false"  # Always disable DEBUG in production
     GS_BUCKET_NAME       = var.bucket_name
     POSTGRES_DB          = var.db_name
     POSTGRES_USER        = var.db_user
     POSTGRES_PASSWORD    = var.db_password
-    POSTGRES_HOST        = "/cloudsql/${var.db_connection_name}"  # Unix socket path for Cloud SQL
-    POSTGRES_PORT        = 5432
+    POSTGRES_HOST        = var.db_host
+    POSTGRES_PORT        = tostring(var.db_port)
     ALLOWED_HOSTS        = "*"
     CORS_ALLOWED_ORIGINS = "*"
     CSRF_TRUSTED_ORIGINS = "https://api.devfest.gdglecce.it"
@@ -27,11 +28,14 @@ resource "google_cloud_run_v2_service" "be" {
   template {
     service_account = google_service_account.runner.email
 
-    # Mount Cloud SQL instance via Unix socket
-    volumes {
-      name = "cloudsql"
-      cloud_sql_instance {
-        instances = [var.db_connection_name]
+    # Mount Cloud SQL instance via Unix socket (only if using Cloud SQL)
+    dynamic "volumes" {
+      for_each = var.use_cloud_sql ? [1] : []
+      content {
+        name = "cloudsql"
+        cloud_sql_instance {
+          instances = [var.db_connection_name]
+        }
       }
     }
 
@@ -42,9 +46,13 @@ resource "google_cloud_run_v2_service" "be" {
         container_port = 8000
       }
 
-      volume_mounts {
-        name       = "cloudsql"
-        mount_path = "/cloudsql"
+      # Mount Cloud SQL volume (only if using Cloud SQL)
+      dynamic "volume_mounts" {
+        for_each = var.use_cloud_sql ? [1] : []
+        content {
+          name       = "cloudsql"
+          mount_path = "/cloudsql"
+        }
       }
 
       # Inject environment variables
@@ -71,20 +79,27 @@ resource "google_cloud_run_v2_job" "be_job" {
     template {
       service_account = google_service_account.runner.email
 
-      # Mount Cloud SQL instance via Unix socket
-      volumes {
-        name = "cloudsql"
-        cloud_sql_instance {
-          instances = [var.db_connection_name]
+      # Mount Cloud SQL instance via Unix socket (only if using Cloud SQL)
+      dynamic "volumes" {
+        for_each = var.use_cloud_sql ? [1] : []
+        content {
+          name = "cloudsql"
+          cloud_sql_instance {
+            instances = [var.db_connection_name]
+          }
         }
       }
 
       containers {
         image = var.image
 
-        volume_mounts {
-          name       = "cloudsql"
-          mount_path = "/cloudsql"
+        # Mount Cloud SQL volume (only if using Cloud SQL)
+        dynamic "volume_mounts" {
+          for_each = var.use_cloud_sql ? [1] : []
+          content {
+            name       = "cloudsql"
+            mount_path = "/cloudsql"
+          }
         }
 
         # Inject environment variables
@@ -119,8 +134,10 @@ resource "google_service_account" "runner" {
   account_id = "gcf-devfest-lecce-be-runner"
 }
 
-# Grant Cloud SQL access to the service account
+# Grant Cloud SQL access to the service account (only if using Cloud SQL)
 resource "google_project_iam_member" "sql" {
+  count = var.use_cloud_sql ? 1 : 0
+
   project = google_service_account.runner.project
   role    = "roles/cloudsql.editor"
   member  = "serviceAccount:${google_service_account.runner.email}"

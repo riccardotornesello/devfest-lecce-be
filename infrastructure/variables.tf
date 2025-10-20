@@ -22,12 +22,6 @@ variable "bucket_name" {
   type        = string
 }
 
-variable "db_password" {
-  description = "The password for the PostgreSQL database user (use a strong password)"
-  type        = string
-  sensitive   = true
-}
-
 variable "domain" {
   description = "The domain name for the backend API (used for SSL certificate)"
   type        = string
@@ -43,4 +37,45 @@ variable "repo_name" {
   description = "The GitHub repository name"
   type        = string
   default     = "devfest-lecce-be"
+}
+
+# Database Configuration
+# You can either use Cloud SQL (managed) or an external database
+
+variable "use_cloud_sql" {
+  description = "Whether to create and use Cloud SQL instance. Set to false to use an external database."
+  type        = bool
+  default     = true
+}
+
+# Cloud SQL specific variables (only used if use_cloud_sql = true)
+variable "db_password" {
+  description = "The password for the PostgreSQL database user (required for both Cloud SQL and external DB)"
+  type        = string
+  sensitive   = true
+}
+
+# External database variables (only used if use_cloud_sql = false)
+variable "external_db_host" {
+  description = "The hostname or IP address of the external PostgreSQL database"
+  type        = string
+  default     = ""
+}
+
+variable "external_db_port" {
+  description = "The port of the external PostgreSQL database"
+  type        = number
+  default     = 5432
+}
+
+variable "external_db_name" {
+  description = "The name of the external PostgreSQL database"
+  type        = string
+  default     = "devfest_lecce_db"
+}
+
+variable "external_db_user" {
+  description = "The username for the external PostgreSQL database"
+  type        = string
+  default     = "devfest"
 }

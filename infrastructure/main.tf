@@ -61,7 +61,10 @@ module "storage" {
 
 # Cloud SQL Database module
 # Creates a PostgreSQL database instance for the application
+# Only created if use_cloud_sql is true
 module "db" {
+  count = var.use_cloud_sql ? 1 : 0
+
   source        = "./db"
   region        = var.region
   password      = var.db_password
@@ -75,10 +78,13 @@ module "db" {
 module "backend" {
   source             = "./backend"
   region             = var.region
+  use_cloud_sql      = var.use_cloud_sql
   db_password        = var.db_password
-  db_name            = module.db.db_name
-  db_user            = module.db.user_name
-  db_connection_name = module.db.connection_name
+  db_name            = var.use_cloud_sql ? module.db[0].db_name : var.external_db_name
+  db_user            = var.use_cloud_sql ? module.db[0].user_name : var.external_db_user
+  db_host            = var.use_cloud_sql ? "/cloudsql/${module.db[0].connection_name}" : var.external_db_host
+  db_port            = var.use_cloud_sql ? 5432 : var.external_db_port
+  db_connection_name = var.use_cloud_sql ? module.db[0].connection_name : ""
   bucket_name        = module.storage.bucket_name
   image              = "${var.region}-docker.pkg.dev/${google_artifact_registry_repository.my-repo.project}/${google_artifact_registry_repository.my-repo.name}/devfest-lecce-backend:latest"
 }

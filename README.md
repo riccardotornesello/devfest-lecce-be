@@ -235,12 +235,18 @@ The entire Google Cloud infrastructure is managed with **Terraform** and is loca
 - Google Cloud Project Services (Artifact Registry, Cloud Build, Cloud Run, SQL Admin)
 - Artifact Registry repository for Docker images
 - Cloud Storage bucket for media files
-- Cloud SQL (PostgreSQL) database instance
+- Cloud SQL (PostgreSQL) database instance (optional - can use external database instead)
 - Cloud Run service for the backend API
 - Cloud Run job for migrations and static file collection
 - Load balancer with SSL certificate
 - Cloud Build trigger (automatic deployment on push to `main`)
 - Service accounts and IAM permissions
+
+### Database Options
+
+You can choose between two database configurations:
+- **Cloud SQL** (default): Managed PostgreSQL instance on Google Cloud
+- **External Database**: Use your own PostgreSQL database (self-hosted or from another provider)
 
 ### Initial Infrastructure Setup
 
@@ -252,8 +258,9 @@ The entire Google Cloud infrastructure is managed with **Terraform** and is loca
 
 2. **Configure variables:**
 
-   Create a `terraform.tfvars` file in the `infrastructure/` directory:
-
+   Create a `terraform.tfvars` file in the `infrastructure/` directory.
+   
+   **For Cloud SQL (default):**
    ```hcl
    project       = "your-gcp-project-id"
    region        = "europe-west1"
@@ -263,6 +270,23 @@ The entire Google Cloud infrastructure is managed with **Terraform** and is loca
    domain        = "api.devfest.gdglecce.it"
    repo_owner    = "riccardotornesello"
    repo_name     = "devfest-lecce-be"
+   ```
+   
+   **For external database:**
+   ```hcl
+   project             = "your-gcp-project-id"
+   region              = "europe-west1"
+   repository_id       = "devfest-lecce"
+   bucket_name         = "devfest-lecce-media"
+   use_cloud_sql       = false
+   external_db_host    = "your-database-host.example.com"
+   external_db_port    = 5432
+   external_db_name    = "devfest_lecce_db"
+   external_db_user    = "devfest"
+   db_password         = "your-secure-database-password"
+   domain              = "api.devfest.gdglecce.it"
+   repo_owner          = "riccardotornesello"
+   repo_name           = "devfest-lecce-be"
    ```
 
 3. **Initialize and apply Terraform:**

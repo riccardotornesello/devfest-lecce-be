@@ -55,11 +55,14 @@ Enables the following APIs required for the application:
 - **Instance Type**: `db-f1-micro` (Enterprise edition)
 - **Deletion Protection**: Enabled to prevent accidental deletion
 - **Purpose**: Stores application data
+- **Optional**: Can be replaced with an external database
 
 **Configuration** (`db/main.tf`):
 - Creates a Cloud SQL instance
 - Creates a database within the instance
 - Creates a user with credentials
+
+**Note**: If you prefer to use an external PostgreSQL database (e.g., managed by another provider or self-hosted), you can set `use_cloud_sql = false` and provide external database credentials. In this case, the Cloud SQL instance will not be created.
 
 ### 5. Cloud Run Backend (Module: `backend/`)
 
@@ -81,11 +84,12 @@ Enables the following APIs required for the application:
   - `TASK=collectstatic` - Collects static files to Cloud Storage
 
 **Environment Variables** (configured in `backend/main.tf`):
+- `DEBUG` - Set to `false` for production
 - `GS_BUCKET_NAME` - Cloud Storage bucket name
 - `POSTGRES_DB` - Database name
 - `POSTGRES_USER` - Database user
 - `POSTGRES_PASSWORD` - Database password
-- `POSTGRES_HOST` - Cloud SQL Unix socket path
+- `POSTGRES_HOST` - Database host (Cloud SQL Unix socket path or external hostname)
 - `POSTGRES_PORT` - Database port (5432)
 - `ALLOWED_HOSTS` - Django allowed hosts
 - `CORS_ALLOWED_ORIGINS` - CORS configuration
@@ -94,7 +98,7 @@ Enables the following APIs required for the application:
 **Service Account**:
 - Custom service account (`gcf-devfest-lecce-be-runner`)
 - Permissions:
-  - `roles/cloudsql.editor` - Access to Cloud SQL
+  - `roles/cloudsql.editor` - Access to Cloud SQL (only if using Cloud SQL)
   - `roles/storage.objectUser` - Access to Cloud Storage
 
 ### 6. Load Balancer
@@ -146,7 +150,9 @@ Before running Terraform, ensure you have:
 
 ### Configuration
 
-1. Create a `terraform.tfvars` file in this directory:
+#### Option 1: Using Cloud SQL (Default - Recommended)
+
+Create a `terraform.tfvars` file in this directory:
 
 ```hcl
 # Google Cloud Project Configuration
@@ -159,7 +165,8 @@ repository_id = "devfest-lecce"
 # Cloud Storage
 bucket_name   = "devfest-lecce-media"
 
-# Database
+# Database Configuration - Cloud SQL
+use_cloud_sql = true  # Default value, can be omitted
 db_password   = "your-secure-database-password"  # Use a strong password!
 
 # Domain
@@ -169,6 +176,43 @@ domain        = "api.devfest.gdglecce.it"
 repo_owner    = "riccardotornesello"
 repo_name     = "devfest-lecce-be"
 ```
+
+#### Option 2: Using an External Database
+
+If you have an existing PostgreSQL database (e.g., managed by another provider or self-hosted), you can use it instead of Cloud SQL:
+
+```hcl
+# Google Cloud Project Configuration
+project       = "your-gcp-project-id"
+region        = "europe-west1"
+
+# Artifact Registry
+repository_id = "devfest-lecce"
+
+# Cloud Storage
+bucket_name   = "devfest-lecce-media"
+
+# Database Configuration - External Database
+use_cloud_sql       = false
+external_db_host    = "your-database-host.example.com"  # Or IP address
+external_db_port    = 5432
+external_db_name    = "devfest_lecce_db"
+external_db_user    = "devfest"
+db_password         = "your-secure-database-password"
+
+# Domain
+domain        = "api.devfest.gdglecce.it"
+
+# GitHub Repository (optional, defaults are set)
+repo_owner    = "riccardotornesello"
+repo_name     = "devfest-lecce-be"
+```
+
+**Note**: When using an external database, ensure:
+- The database is accessible from Google Cloud Run (check firewall rules)
+- The database is PostgreSQL 12 or higher
+- The specified database and user already exist
+- The user has full permissions on the database
 
 2. **Security Note**: Never commit `terraform.tfvars` to version control. It's already in `.gitignore`.
 
@@ -254,10 +298,17 @@ Note: The Cloud SQL instance has deletion protection enabled. You'll need to dis
 | `region` | string | Deployment region | `europe-west1` |
 | `repository_id` | string | Artifact Registry repository ID | *Required* |
 | `bucket_name` | string | Cloud Storage bucket name | *Required* |
-| `db_password` | string | Database password | *Required* |
 | `domain` | string | Domain for SSL certificate | *Required* |
 | `repo_owner` | string | GitHub repository owner | `riccardotornesello` |
 | `repo_name` | string | GitHub repository name | `devfest-lecce-be` |
+| **Database Configuration** | | | |
+| `use_cloud_sql` | bool | Whether to use Cloud SQL or external database | `true` |
+| `db_password` | string | Database password (for both Cloud SQL and external DB) | *Required* |
+| **External Database Variables** (only used if `use_cloud_sql = false`) | | | |
+| `external_db_host` | string | External database hostname or IP | `""` |
+| `external_db_port` | number | External database port | `5432` |
+| `external_db_name` | string | External database name | `devfest_lecce_db` |
+| `external_db_user` | string | External database username | `devfest` |
 
 ## 🔐 Security Considerations
 
