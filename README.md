@@ -104,6 +104,23 @@ Install pre-commit hooks to automatically lint and format on commit:
 uv run pre-commit install
 ```
 
+### GitHub Workflows
+
+This repository includes two GitHub Actions workflows for development purposes:
+
+1. **CI Workflow** (`.github/workflows/ci.yml`): Runs on push and pull requests
+   - Lints and formats code with ruff
+   - Runs security scans
+   - Validates Django configuration
+   - Tests Docker build
+
+2. **Release Workflow** (`.github/workflows/release.yml`): Runs on release creation
+   - Builds Docker image
+   - Publishes to GitHub Container Registry
+   - Creates build attestation for supply chain security
+
+**Note:** These workflows are for reference and development testing only. They validate code quality and ensure the Docker image builds correctly, but they do not deploy to production.
+
 ## 🏗️ Project Structure
 
 ```
@@ -151,14 +168,28 @@ docker run -p 8000:8000 --env-file .env devfest-lecce-be
 
 ## ☁️ Deployment
 
-### GitHub Container Registry (Recommended)
+### Production Deployment Pipeline
 
-Docker images are automatically built and published to GitHub Container Registry on every release. The release workflow:
+**The production deployment is fully automated using Google Cloud Build.** On every push to the `main` branch, Cloud Build automatically:
 
-1. Builds the Docker image
-2. Pushes to `ghcr.io/riccardotornesello/devfest-lecce-be`
-3. Creates build attestation for supply chain security
-4. Tags images with version numbers and `latest`
+1. **Builds the Docker image** and pushes it to Artifact Registry
+2. **Updates the Cloud Run Job** with the new image
+3. **Runs database migrations** via the Cloud Run Job (`TASK=migrate`)
+4. **Collects static files** via the Cloud Run Job (`TASK=collectstatic`)
+5. **Deploys the backend service** to Cloud Run with the new image
+
+The pipeline is configured in `cloudbuild.yaml` and is triggered automatically by a Cloud Build trigger set up through Terraform (see Infrastructure section below).
+
+**Manual Trigger (if needed):**
+
+```bash
+gcloud builds submit --config cloudbuild.yaml \
+  --substitutions=_ARTIFACT_REGISTRY="europe-west1-docker.pkg.dev/devfest-lecce/devfest-lecce",_SERVICE_REGION="europe-west1"
+```
+
+### GitHub Container Registry (Optional - For Development)
+
+Docker images can also be published to GitHub Container Registry through the release workflow. This is useful for development and testing purposes:
 
 **Creating a Release:**
 
@@ -182,16 +213,6 @@ The workflow automatically publishes the image to:
 docker pull ghcr.io/riccardotornesello/devfest-lecce-be:latest
 ```
 
-### Google Cloud Platform
-
-This project is configured for deployment on Google Cloud Run. See `cloudbuild.yaml` for the CI/CD pipeline configuration.
-
-```bash
-# Build and deploy
-gcloud builds submit --config cloudbuild.yaml \
-  --substitutions=_ARTIFACT_REGISTRY="europe-west1-docker.pkg.dev/devfest-lecce/devfest-lecce",_SERVICE_REGION="europe-west1"
-```
-
 ### Environment Variables for Production
 
 Ensure the following environment variables are set in your production environment:
@@ -204,6 +225,61 @@ Ensure the following environment variables are set in your production environmen
 - Database credentials
 - `FIREBASE_AUDIENCE`: Your Firebase project ID
 - `GS_BUCKET_NAME`: For media storage (if using Google Cloud Storage)
+
+## 🏗️ Infrastructure
+
+The entire Google Cloud infrastructure is managed with **Terraform** and is located in the `infrastructure/` directory.
+
+**⚠️ Important: Terraform should only be executed once during initial setup.** It provisions all the necessary infrastructure including:
+
+- Google Cloud Project Services (Artifact Registry, Cloud Build, Cloud Run, SQL Admin)
+- Artifact Registry repository for Docker images
+- Cloud Storage bucket for media files
+- Cloud SQL (PostgreSQL) database instance
+- Cloud Run service for the backend API
+- Cloud Run job for migrations and static file collection
+- Load balancer with SSL certificate
+- Cloud Build trigger (automatic deployment on push to `main`)
+- Service accounts and IAM permissions
+
+### Initial Infrastructure Setup
+
+1. **Prerequisites:**
+   - Google Cloud Project created
+   - Terraform installed (`terraform` CLI)
+   - Google Cloud SDK installed and authenticated (`gcloud auth application-default login`)
+   - GitHub repository connected to Google Cloud Build
+
+2. **Configure variables:**
+
+   Create a `terraform.tfvars` file in the `infrastructure/` directory:
+
+   ```hcl
+   project       = "your-gcp-project-id"
+   region        = "europe-west1"
+   repository_id = "devfest-lecce"
+   bucket_name   = "devfest-lecce-media"
+   db_password   = "your-secure-database-password"
+   domain        = "api.devfest.gdglecce.it"
+   repo_owner    = "riccardotornesello"
+   repo_name     = "devfest-lecce-be"
+   ```
+
+3. **Initialize and apply Terraform:**
+
+   ```bash
+   cd infrastructure
+   terraform init
+   terraform plan  # Review the infrastructure changes
+   terraform apply  # Apply the changes (type 'yes' to confirm)
+   ```
+
+4. **Post-setup:**
+   - Once applied, Terraform will output important values like database connection details
+   - The Cloud Build trigger will automatically deploy on every push to `main`
+   - Manual intervention should not be needed unless infrastructure changes are required
+
+For detailed information about the infrastructure components, see the [infrastructure README](infrastructure/README.md).
 
 ## 🔐 Security
 
