@@ -1,3 +1,12 @@
+"""
+Utility functions for the DevFest Lecce 2025 backend.
+
+This module provides common utility functions including:
+- Firebase token verification
+- Console output formatting with colors
+- Logging helpers
+"""
+
 import logging
 
 import cachecontrol
@@ -51,11 +60,28 @@ def print_section_end(section_name):
 
 
 def verify_firebase_token(id_token_str):
-    # TODO: variable audience
+    """
+    Verify a Firebase ID token.
+
+    Args:
+        id_token_str: The Firebase ID token to verify
+
+    Returns:
+        The user ID (sub) if verification is successful, None otherwise
+    """
+    import os
+
+    # Get the Firebase audience from environment variable
+    audience = os.getenv("FIREBASE_AUDIENCE")
+    if not audience:
+        print_error(
+            "FIREBASE_AUDIENCE environment variable is not set. Firebase authentication is disabled."
+        )
+        return None
 
     try:
         decoded = id_token.verify_firebase_token(
-            id_token_str, request, audience="devfest-31ac3"
+            id_token_str, request, audience=audience
         )
         return decoded["sub"]
     except Exception as e:

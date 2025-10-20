@@ -1,0 +1,127 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, dev ]
+  pull_request:
+    branches: [ main, dev ]
+
+# Limit permissions to minimum required for security
+permissions:
+  contents: read
+
+jobs:
+  lint-and-format:
+    name: Lint and Format Check
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: uv sync
+    
+    - name: Check formatting with ruff
+      run: uv run ruff format --check .
+    
+    - name: Lint with ruff
+      run: uv run ruff check .
+  
+  security-scan:
+    name: Security Scan
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: uv sync
+    
+    - name: Run safety check for known vulnerabilities
+      run: |
+        uv pip install safety
+        uv run safety check --json || true
+      continue-on-error: true
+  
+  build-test:
+    name: Build and Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10'
+    
+    - name: Install uv
+      run: |
+        curl -LsSf https://astral.sh/uv/install.sh | sh
+        echo "$HOME/.local/bin" >> $GITHUB_PATH
+    
+    - name: Install dependencies
+      run: uv sync
+    
+    - name: Run Django checks
+      run: |
+        cd devfest_lecce_2025_be
+        uv run python manage.py check
+      env:
+        SECRET_KEY: "test-secret-key-for-ci"
+        DEBUG: "false"
+    
+    - name: Run migrations check
+      run: |
+        cd devfest_lecce_2025_be
+        uv run python manage.py makemigrations --check --dry-run
+      env:
+        SECRET_KEY: "test-secret-key-for-ci"
+        DEBUG: "false"
+  
+  docker-build:
+    name: Docker Build Test
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    
+    steps:
+    - uses: actions/checkout@v4
+    
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v3
+    
+    - name: Build Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        push: false
+        tags: devfest-lecce-be:test
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
