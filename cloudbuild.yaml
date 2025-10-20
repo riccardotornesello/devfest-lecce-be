@@ -1,5 +1,10 @@
+# Google Cloud Build Pipeline Configuration
+# This pipeline is automatically triggered on every push to the main branch
+# It builds the Docker image, updates the backend service and jobs, and runs migrations
+
 steps:
-  # Build the image
+  # Step 1: Pull the latest image from Artifact Registry for caching
+  # This speeds up the build process by reusing layers from the previous build
   - name: "gcr.io/cloud-builders/docker"
     entrypoint: "bash"
     args:
@@ -8,6 +13,8 @@ steps:
         "docker pull ${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest || exit 0",
       ]
 
+  # Step 2: Build the Docker image with caching
+  # Uses the previously pulled image as cache to speed up the build
   - name: "gcr.io/cloud-builders/docker"
     args:
       [
@@ -19,11 +26,13 @@ steps:
         ".",
       ]
 
-  # Push the image to Artifact Registry
+  # Step 3: Push the newly built image to Artifact Registry
+  # This makes the image available for Cloud Run deployment
   - name: "gcr.io/cloud-builders/docker"
     args: ["push", "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"]
 
-  # Update and execute the jobs to collect static and apply migrations
+  # Step 4: Update the Cloud Run Job with the new image
+  # The job is used to run database migrations and collect static files
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -34,6 +43,9 @@ steps:
       - "--image=${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
       - "--region=${_SERVICE_REGION}"
 
+  # Step 5: Execute the job to collect static files
+  # This runs the Django collectstatic command to gather all static files
+  # Static files are stored in Google Cloud Storage
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -44,6 +56,8 @@ steps:
       - "--update-env-vars=TASK=collectstatic"
       - "--region=${_SERVICE_REGION}"
 
+  # Step 6: Execute the job to run database migrations
+  # This applies any pending Django migrations to the database
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -54,7 +68,9 @@ steps:
       - "--update-env-vars=TASK=migrate"
       - "--region=${_SERVICE_REGION}"
 
-  # Deploy image to Cloud Run
+  # Step 7: Deploy the new image to Cloud Run service
+  # This updates the backend API service with the new image
+  # Cloud Run automatically handles zero-downtime deployment
   - name: "gcr.io/google.com/cloudsdktool/cloud-sdk"
     entrypoint: gcloud
     args:
@@ -65,8 +81,12 @@ steps:
       - "--image=${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
       - "--region=${_SERVICE_REGION}"
 
+# Images to be stored in Artifact Registry
 images:
   - "${_ARTIFACT_REGISTRY}/devfest-lecce-backend:latest"
 
+# Build options
 options:
+  # Use Cloud Logging for better log management and debugging
   logging: CLOUD_LOGGING_ONLY
+
