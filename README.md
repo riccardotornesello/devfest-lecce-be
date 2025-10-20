@@ -151,6 +151,37 @@ docker run -p 8000:8000 --env-file .env devfest-lecce-be
 
 ## ☁️ Deployment
 
+### GitHub Container Registry (Recommended)
+
+Docker images are automatically built and published to GitHub Container Registry on every release. The release workflow:
+
+1. Builds the Docker image
+2. Pushes to `ghcr.io/riccardotornesello/devfest-lecce-be`
+3. Creates build attestation for supply chain security
+4. Tags images with version numbers and `latest`
+
+**Creating a Release:**
+
+```bash
+# Create and push a tag
+git tag -a v1.0.0 -m "Release version 1.0.0"
+git push origin v1.0.0
+
+# Then create a release on GitHub from the tag
+```
+
+The workflow automatically publishes the image to:
+- `ghcr.io/riccardotornesello/devfest-lecce-be:latest`
+- `ghcr.io/riccardotornesello/devfest-lecce-be:1.0.0`
+- `ghcr.io/riccardotornesello/devfest-lecce-be:1.0`
+- `ghcr.io/riccardotornesello/devfest-lecce-be:1`
+
+**Pulling the Image:**
+
+```bash
+docker pull ghcr.io/riccardotornesello/devfest-lecce-be:latest
+```
+
 ### Google Cloud Platform
 
 This project is configured for deployment on Google Cloud Run. See `cloudbuild.yaml` for the CI/CD pipeline configuration.
